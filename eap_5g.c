@@ -1,21 +1,21 @@
-#include "eap_20893_66666.h"
+#include "eap_5g.h"
 
 #include <daemon.h>
 #include <library.h>
 
 #define NAS_MSG "I am a test NAS packet"
 
-typedef struct private_eap_20893_66666_t private_eap_20893_66666_t;
+typedef struct private_eap_5g_t private_eap_5g_t;
 
 /**
- * Private data of an eap_20893_66666_t object.
+ * Private data of an eap_5g_t object.
  */
-struct private_eap_20893_66666_t {
+struct private_eap_5g_t {
 
 	/**
 	 * Public authenticator_t interface.
 	 */
-	eap_20893_66666_t public;
+	eap_5g_t public;
 
 	/**
 	 * ID of the server
@@ -33,12 +33,12 @@ struct private_eap_20893_66666_t {
 	uint8_t identifier;
 };
 
-typedef struct eap_20893_66666_header_t eap_20893_66666_header_t;
+typedef struct eap_5g_header_t eap_5g_header_t;
 
 /**
  * packed eap 5G header struct
  */
-struct eap_20893_66666_header_t {
+struct eap_5g_header_t {
 	/** EAP code (REQUEST/RESPONSE) */
 	uint8_t code;
 	/** unique message identifier */
@@ -56,14 +56,11 @@ struct eap_20893_66666_header_t {
 } __attribute__((__packed__));
 
 METHOD(eap_method_t, initiate_peer, status_t,
-	private_eap_20893_66666_t *this, eap_payload_t **out)
+	private_eap_5g_t *this, eap_payload_t **out)
 {
 	/* peer never initiates */
 	return FAILED;
 }
-
-#define VENDOR_ID 66666
-#define VENDOR_TYPE 20893
 
 #define SETTYPEPLUSID(addr) \
 	*(uint32_t *)addr = \
@@ -71,12 +68,12 @@ METHOD(eap_method_t, initiate_peer, status_t,
 	(VENDOR_ID))
 
 METHOD(eap_method_t, initiate_server, status_t,
-	private_eap_20893_66666_t *this, eap_payload_t **out)
+	private_eap_5g_t *this, eap_payload_t **out)
 {
-	eap_20893_66666_header_t *req;
+	eap_5g_header_t *req;
 	size_t len;
 
-	len = sizeof(eap_20893_66666_header_t) + strlen(NAS_MSG);
+	len = sizeof(eap_5g_header_t) + strlen(NAS_MSG);
 	req = alloca(len);
 	req->length = htons(len);
 	req->code = EAP_REQUEST;
@@ -91,9 +88,9 @@ METHOD(eap_method_t, initiate_server, status_t,
 }
 
 METHOD(eap_method_t, process_peer, status_t,
-        private_eap_20893_66666_t *this, eap_payload_t *in, eap_payload_t **out)
+        private_eap_5g_t *this, eap_payload_t *in, eap_payload_t **out)
 {
-        eap_20893_66666_header_t *res;
+        eap_5g_header_t *res;
         size_t len;
 
         chunk_t msg = chunk_skip(in->get_data(in), 12);
@@ -105,7 +102,7 @@ METHOD(eap_method_t, process_peer, status_t,
         const char pass2[] = "10km";
 
         if(strcmp(str, "more") == 0) {
-                len = sizeof(eap_20893_66666_header_t) + strlen(pass2);
+                len = sizeof(eap_5g_header_t) + strlen(pass2);
                 this->identifier = in->get_identifier(in);
                 res = alloca(len);
                 res->length = htons(len);
@@ -118,7 +115,7 @@ METHOD(eap_method_t, process_peer, status_t,
                 *out = eap_payload_create_data(chunk_create((void*)res, len));
         }
         else {
-                len = sizeof(eap_20893_66666_header_t) + strlen(pass1);
+                len = sizeof(eap_5g_header_t) + strlen(pass1);
                 this->identifier = in->get_identifier(in);
                 res = alloca(len);
                 res->length = htons(len);
@@ -138,7 +135,7 @@ METHOD(eap_method_t, process_peer, status_t,
 
 
 METHOD(eap_method_t, process_server, status_t,
-	private_eap_20893_66666_t *this, eap_payload_t *in, eap_payload_t **out)
+	private_eap_5g_t *this, eap_payload_t *in, eap_payload_t **out)
 {
 	const char magic[] = "10km";
 
@@ -152,11 +149,11 @@ METHOD(eap_method_t, process_server, status_t,
 		return SUCCESS;
 	}
 	else {
-		eap_20893_66666_header_t *req;
+		eap_5g_header_t *req;
 		size_t len;
 		const char more[] = "more";
 
-		len = sizeof(eap_20893_66666_header_t) + strlen(more);
+		len = sizeof(eap_5g_header_t) + strlen(more);
 		req = alloca(len);
 		req->length = htons(len);
 		req->code = EAP_REQUEST;
@@ -173,38 +170,38 @@ METHOD(eap_method_t, process_server, status_t,
 }
 
 METHOD(eap_method_t, get_type, eap_type_t,
-	private_eap_20893_66666_t *this, uint32_t *vendor)
+	private_eap_5g_t *this, uint32_t *vendor)
 {
 	*vendor = VENDOR_ID;
 	return VENDOR_TYPE;
 }
 
 METHOD(eap_method_t, get_msk, status_t,
-	private_eap_20893_66666_t *this, chunk_t *msk)
+	private_eap_5g_t *this, chunk_t *msk)
 {
 	return FAILED;
 }
 
 METHOD(eap_method_t, get_identifier, uint8_t,
-	private_eap_20893_66666_t *this)
+	private_eap_5g_t *this)
 {
 	return this->identifier;
 }
 
 METHOD(eap_method_t, set_identifier, void,
-	private_eap_20893_66666_t *this, uint8_t identifier)
+	private_eap_5g_t *this, uint8_t identifier)
 {
 	this->identifier = identifier;
 }
 
 METHOD(eap_method_t, is_mutual, bool,
-	private_eap_20893_66666_t *this)
+	private_eap_5g_t *this)
 {
 	return FALSE;
 }
 
 METHOD(eap_method_t, destroy, void,
-	private_eap_20893_66666_t *this)
+	private_eap_5g_t *this)
 {
 	this->peer->destroy(this->peer);
 	this->server->destroy(this->server);
@@ -214,10 +211,10 @@ METHOD(eap_method_t, destroy, void,
 /**
  * Generic constructor
  */
-static private_eap_20893_66666_t *eap_20893_66666_create_generic(identification_t *server,
+static private_eap_5g_t *eap_5g_create_generic(identification_t *server,
 												 identification_t *peer)
 {
-	private_eap_20893_66666_t *this;
+	private_eap_5g_t *this;
 
 	INIT(this,
 		.public = {
@@ -240,9 +237,9 @@ static private_eap_20893_66666_t *eap_20893_66666_create_generic(identification_
 /*
  * see header
  */
-eap_20893_66666_t *eap_20893_66666_create_server(identification_t *server, identification_t *peer)
+eap_5g_t *eap_5g_create_server(identification_t *server, identification_t *peer)
 {
-	private_eap_20893_66666_t *this = eap_20893_66666_create_generic(server, peer);
+	private_eap_5g_t *this = eap_5g_create_generic(server, peer);
 
 	this->public.eap_method_interface.initiate = _initiate_server;
 	this->public.eap_method_interface.process = _process_server;
@@ -258,9 +255,9 @@ eap_20893_66666_t *eap_20893_66666_create_server(identification_t *server, ident
 /*
  * see header
  */
-eap_20893_66666_t *eap_20893_66666_create_peer(identification_t *server, identification_t *peer)
+eap_5g_t *eap_5g_create_peer(identification_t *server, identification_t *peer)
 {
-	private_eap_20893_66666_t *this = eap_20893_66666_create_generic(server, peer);
+	private_eap_5g_t *this = eap_5g_create_generic(server, peer);
 
 	this->public.eap_method_interface.initiate = _initiate_peer;
 	this->public.eap_method_interface.process = _process_peer;
