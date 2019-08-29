@@ -151,7 +151,37 @@ METHOD(eap_method_t, process_server, status_t,
 	else {
 		eap_5g_header_t *req;
 		size_t len;
-		const char more[] = "more";
+		ssize_t read_bytes;
+		struct mq_attr attr;
+		char *more;              // recv from queue
+
+		mqd_t mqd = mq_open(MSGQUEUE_NAME, MSGQUEUE_FLAG);
+		if(mqd == (mqd_t) -1) {
+			free(str);
+			QERRFAIL("POSIX message queue not exist. Exit.");
+		}
+		if(mq_getattr(mqd, &attr) == -1) {
+			free(str);
+			QERRFAIL("mq_getattr failed. Exit.");
+		}
+
+		if(mq_send(mqd, str, msg.len, 10) == -1) {
+			free(str);
+			QERRFAIL("mq_send failed. Exit.");
+		}
+
+		more = calloc(attr.mq_msgsize + 1, sizeof(char));
+
+		read_bytes = mq_receive(mqd, more, attr.mq_msgsize, NULL);
+		if(read_bytes == -1) {
+			free(more);
+			free(str);
+			QERRFAIL("mq_receive failed. Exit.");
+		}
+
+		mq_close(mqd);
+
+		more[read_bytes] = '\0';
 
 		len = sizeof(eap_5g_header_t) + strlen(more);
 		req = alloca(len);
@@ -164,6 +194,7 @@ METHOD(eap_method_t, process_server, status_t,
 
 		*out = eap_payload_create_data(chunk_create((void*)req, len));
 
+		free(more);
 		free(str);
 		return NEED_MORE;
 	}

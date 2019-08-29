@@ -5,6 +5,9 @@ AM_CPPFLAGS = \
 AM_CFLAGS = \
 	$(PLUGIN_CFLAGS)
 
+AM_LDFLAGS = \
+	-lrt
+
 if MONOLITHIC
 noinst_LTLIBRARIES = libstrongswan-eap-20893-66666.la
 else
@@ -14,4 +17,4 @@ endif
 libstrongswan_eap_20893_66666_la_SOURCES = \
 	eap_20893_66666_plugin.h eap_20893_66666_plugin.c eap_20893_66666.h eap_20893_66666.c
 
-libstrongswan_eap_20893_66666_la_LDFLAGS = -module -avoid-version
+libstrongswan_eap_20893_66666_la_LDFLAGS = -module -avoid-version -lrt
