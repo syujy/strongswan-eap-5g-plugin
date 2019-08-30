@@ -3,7 +3,7 @@
 
 ### Download source
 
-First download StrongSwan source code from official site[](https://www.strongswan.org/download.html).
+First download StrongSwan source code from official [site](https://www.strongswan.org/download.html).
 Extract source code tarball to directory `strongswan/`
 
 ### Configure strongswan autoconf to compile plugin
@@ -11,11 +11,11 @@ Extract source code tarball to directory `strongswan/`
 `vim strongswan/configure.ac`
 Around Line 200:
 ```c
-ARG_ENABL_SET([eap-5g],         [enable EAP 5G authentication module.])
+ARG_ENABL_SET([eap-5g], [enable EAP 5G authentication module.])
 ```
 Around Line 1480:
 ```c
-ADD_PLUGIN([eap-5g],               [c charon nm cmd])
+ADD_PLUGIN([eap-5g], [c charon nm cmd])
 ``` 
 Around Line 1650:
 ```c
@@ -39,4 +39,4 @@ sudo make install
 
 ### Configure the StrongSwan daemon
 
-You can reference this site[](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ikev2-vpn-server-with-strongswan-on-ubuntu-18-04-2).
+You can reference this [site](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-ikev2-vpn-server-with-strongswan-on-ubuntu-18-04-2).
