@@ -2,6 +2,7 @@
 
 #include <daemon.h>
 #include <library.h>
+#include <mqueue.h>
 
 #define NAS_MSG "I am a test NAS packet"
 
@@ -66,6 +67,14 @@ METHOD(eap_method_t, initiate_peer, status_t,
 	*(uint32_t *)addr = \
 	htonl(((uint32_t)EAP_EXPANDED << 24) | \
 	(VENDOR_ID))
+
+#define MSGQUEUE_NAME "/testqueue"
+#define MSGQUEUE_FLAG ( O_RDWR )
+
+#define QERRFAIL(msg) do {                 \
+			DBG1(DBG_IKE, msg); \
+			return FAILED;     \
+		      } while(0)
 
 METHOD(eap_method_t, initiate_server, status_t,
 	private_eap_5g_t *this, eap_payload_t **out)
